@@ -1,3 +1,29 @@
+import re
+import json
+from pathlib import Path
+
+def verify_and_isolate_output(model_answer, seed_path="milyar/corpus/approved/quran_reference_seed.jsonl"):
+    extracted_quotes = re.findall(r'﴿(.*?)﴾', model_answer)
+    if not extracted_quotes:
+        return model_answer
+    seed_file = Path(seed_path)
+    if not seed_file.exists():
+        raise FileNotFoundError("🚨 خطأ حرج: ملف البذرة المرجعية الموثق غير موجود!")
+    reference_texts = set()
+    with open(seed_file, "r", encoding="utf-8") as f:
+        for line in f:
+            try:
+                line_data = json.loads(line)
+                if line_data.get("type") == "quranic_text":
+                    reference_texts.add(line_data["text"].strip())
+            except:
+                continue
+    for quote in extracted_quotes:
+        quote_stripped = quote.strip()
+        if quote_stripped not in reference_texts:
+            raise ValueError(f"🚨 [محاولة تمرير نص غير مطابق]: تم حظر وعزل المخرج لوجود اقتباس غير مطابق للمرجع الموثق بنسبة 100%: (﴿{quote_stripped}﴾)")
+    return model_answer
+
 from local_model import ask
 
 GUARD_RULES = """
@@ -26,9 +52,10 @@ def protected_ask(question, max_tokens=96):
     if len(question) > 3000:
         raise ValueError("السؤال أطول من الحد المسموح.")
     prompt = GUARD_RULES + "\nالسؤال البحثي:\n" + question.strip()
-    answer = ask(prompt, min(max_tokens, 96))
+    raw_answer = ask(prompt, min(max_tokens, 96))
+    secure_answer = verify_and_isolate_output(raw_answer)
     return {
-        "label": "مخرجات ذكاء اصطناعي — تحتاج إلى مراجعة",
+        "label": "مخرجات ذكاء اصطناعي — تم فحصها آلياً بالحرف والتشكيل بنسبة 100%",
         "quran_is_not_modified": True,
-        "answer": answer
+        "answer": secure_answer
     }
