@@ -1,3 +1,8 @@
+import sys
+from pathlib import Path
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 import re
 import json
 from pathlib import Path
@@ -24,7 +29,7 @@ def verify_and_isolate_output(model_answer, seed_path="milyar/corpus/approved/qu
             raise ValueError(f"🚨 [محاولة تمرير نص غير مطابق]: تم حظر وعزل المخرج لوجود اقتباس غير مطابق للمرجع الموثق بنسبة 100%: (﴿{quote_stripped}﴾)")
     return model_answer
 
-from local_model import ask
+from milyar.local_model import ask
 
 GUARD_RULES = """
 أنت مساعد بحث ضمن مشروع قمرا منيرا بإذن ربه.
