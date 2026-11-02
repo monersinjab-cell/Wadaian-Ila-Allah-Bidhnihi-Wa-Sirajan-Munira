@@ -1,0 +1,15 @@
+{
+  "schema_version": 2,
+  "purpose": "byte_and_structural_integrity",
+  "reference_file": "quran/quran.txt",
+  "encoding": "UTF-8",
+  "byte_length": 887,
+  "metrics": {
+    "line_count": 15,
+    "word_count": 58,
+    "character_count": 517
+  },
+  "sha256": "4c0344216a5cf9ca4abaa2d87d62d872381ec21529bd85bff6bb58d645d6834f",
+  "created_at_utc": "2026-11-02T23:30:09.230785+00:00",
+  "warning": "البصمة لا تثبت أصالة المصدر أو صحة النص من الناحية التفسيرية. راجع المصدر قبل اعتماد خط الأساس."
+}
