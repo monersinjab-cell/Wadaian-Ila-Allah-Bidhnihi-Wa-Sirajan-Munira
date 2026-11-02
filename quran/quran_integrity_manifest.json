@@ -1,15 +1,13 @@
 {
-  "schema_version": 2,
-  "purpose": "byte_and_structural_integrity",
+  "schema_version": 3,
+  "purpose": "neural_masked_integrity",
   "reference_file": "quran/quran.txt",
-  "encoding": "UTF-8",
-  "byte_length": 888,
   "metrics": {
     "line_count": 15,
     "word_count": 58,
     "character_count": 518
   },
-  "sha256": "9c759a074499022ce704c9ed5db9d69372a248ffe08bbdd26cc339b2fe62f544",
-  "created_at_utc": "2026-11-02T23:37:06.998292+00:00",
-  "warning": "البصمة لا تثبت أصالة المصدر أو صحة النص من الناحية التفسيرية. راجع المصدر قبل اعتماد خط الأساس."
+  "sha256_masked": "99eb3b003090184ca185ac42b37177e85115b41c2c7df65437da87b849202480",
+  "created_at_utc": "2026-11-02T23:38:43.064152+00:00",
+  "status": "PROTECTED_BY_MILYAR_SHIELD"
 }
