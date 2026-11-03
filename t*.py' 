@@ -1,0 +1,102 @@
+[1mdiff --git a/milyar/quran_guard.py b/milyar/quran_guard.py[m
+[1mindex 0ff4c64..56bc090 100644[m
+[1m--- a/milyar/quran_guard.py[m
+[1m+++ b/milyar/quran_guard.py[m
+[36m@@ -7,26 +7,73 @@[m [mimport re[m
+ import json[m
+ from pathlib import Path[m
+ [m
+[31m-def verify_and_isolate_output(model_answer, seed_path="milyar/corpus/approved/quran_reference_seed.jsonl"):[m
+[31m-    extracted_quotes = re.findall(r'﴿(.*?)﴾', model_answer)[m
+[32m+[m[32mdef verify_and_isolate_output([m
+[32m+[m[32m    model_answer,[m
+[32m+[m[32m    seed_path="milyar/corpus/approved/quran_reference_seed.jsonl"[m
+[32m+[m[32m):[m
+[32m+[m[32m    if not isinstance(model_answer, str):[m
+[32m+[m[32m        raise TypeError("الإجابة يجب أن تكون نصاً.")[m
+[32m+[m
+[32m+[m[32m    # لا نسمح بوجود علامة اقتباس افتتاحية أو ختامية غير متوازنة.[m
+[32m+[m[32m    if model_answer.count("﴿") != model_answer.count("﴾"):[m
+[32m+[m[32m        raise ValueError("علامات الاقتباس القرآني غير متوازنة.")[m
+[32m+[m
+[32m+[m[32m    extracted_quotes = re.findall([m
+[32m+[m[32m        r"﴿(.*?)﴾", model_answer, flags=re.DOTALL[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m[32m    # هذا الفحص لا يدّعي اكتشاف الاقتباسات غير المحاطة بالعلامتين.[m
+     if not extracted_quotes:[m
+         return model_answer[m
+[32m+[m
+     seed_file = Path(seed_path)[m
+[31m-    if not seed_file.exists():[m
+[31m-        raise FileNotFoundError("🚨 خطأ حرج: ملف البذرة المرجعية الموثق غير موجود!")[m
+[32m+[m[32m    if not seed_file.is_absolute():[m
+[32m+[m[32m        seed_file = ROOT_DIR / seed_file[m
+[32m+[m
+[32m+[m[32m    if not seed_file.is_file():[m
+[32m+[m[32m        raise FileNotFoundError("ملف البذرة المرجعية غير موجود.")[m
+[32m+[m
+     reference_texts = set()[m
+[31m-    with open(seed_file, "r", encoding="utf-8") as f:[m
+[31m-        for line in f:[m
+[31m-            try:[m
+[31m-                line_data = json.loads(line)[m
+[31m-                if line_data.get("type") == "quranic_text":[m
+[31m-                    reference_texts.add(line_data["text"].strip())[m
+[31m-            except:[m
+[32m+[m
+[32m+[m[32m    with seed_file.open(encoding="utf-8") as f:[m
+[32m+[m[32m        for line_number, line in enumerate(f, 1):[m
+[32m+[m[32m            if not line.strip():[m
+                 continue[m
+[32m+[m[32m            try:[m
+[32m+[m[32m                item = json.loads(line)[m
+[32m+[m[32m            except json.JSONDecodeError as exc:[m
+[32m+[m[32m                raise ValueError([m
+[32m+[m[32m                    f"سجل JSON غير صالح في السطر {line_number}."[m
+[32m+[m[32m                ) from exc[m
+[32m+[m
+[32m+[m[32m            if not isinstance(item, dict):[m
+[32m+[m[32m                raise ValueError([m
+[32m+[m[32m                    f"السجل {line_number} ليس كائناً صالحاً."[m
+[32m+[m[32m                )[m
+[32m+[m
+[32m+[m[32m            if item.get("type") == "quranic_text":[m
+[32m+[m[32m                text = item.get("text")[m
+[32m+[m[32m                if not isinstance(text, str) or not text.strip():[m
+[32m+[m[32m                    raise ValueError([m
+[32m+[m[32m                        f"النص المرجعي فارغ أو غير صالح في السطر {line_number}."[m
+[32m+[m[32m                    )[m
+[32m+[m[32m                # توحيد المسافات فقط؛ لا نحذف التشكيل ولا نغير الحروف.[m
+[32m+[m[32m                reference_texts.add(" ".join(text.split()))[m
+[32m+[m
+[32m+[m[32m    if not reference_texts:[m
+[32m+[m[32m        raise ValueError("لا توجد نصوص قرآنية في البذرة المرجعية.")[m
+[32m+[m
+     for quote in extracted_quotes:[m
+[31m-        quote_stripped = quote.strip()[m
+[31m-        if quote_stripped not in reference_texts:[m
+[31m-            raise ValueError(f"🚨 [محاولة تمرير نص غير مطابق]: تم حظر وعزل المخرج لوجود اقتباس غير مطابق للمرجع الموثق بنسبة 100%: (﴿{quote_stripped}﴾)")[m
+[32m+[m[32m        quote_normalized = " ".join(quote.split())[m
+[32m+[m[32m        if not quote_normalized:[m
+[32m+[m[32m            raise ValueError("يوجد اقتباس فارغ.")[m
+[32m+[m
+[32m+[m[32m        if quote_normalized not in reference_texts:[m
+[32m+[m[32m            raise ValueError([m
+[32m+[m[32m                "اقتباس محاط بالعلامتين غير مطابق للنصوص الموجودة "[m
+[32m+[m[32m                "في البذرة المرجعية."[m
+[32m+[m[32m            )[m
+[32m+[m
+     return model_answer[m
+ [m
+ from milyar.local_model import ask[m
+[36m@@ -60,7 +107,8 @@[m [mdef protected_ask(question, max_tokens=96):[m
+     raw_answer = ask(prompt, min(max_tokens, 96))[m
+     secure_answer = verify_and_isolate_output(raw_answer)[m
+     return {[m
+[31m-        "label": "مخرجات ذكاء اصطناعي — تم فحصها آلياً بالحرف والتشكيل بنسبة 100%",[m
+[32m+[m[32m        "label": "مخرجات ذكاء اصطناعي — فُحصت الاقتباسات المحددة مقابل البذرة المرجعية",[m
+         "quran_is_not_modified": True,[m
+[32m+[m[32m        "verification_scope": "الاقتباسات المحاطة بالعلامتين فقط؛ لا يشمل كل النصوص القرآنية.",[m
+         "answer": secure_answer[m
+     }[m

@@ -7,26 +7,73 @@ import re
 import json
 from pathlib import Path
 
-def verify_and_isolate_output(model_answer, seed_path="milyar/corpus/approved/quran_reference_seed.jsonl"):
-    extracted_quotes = re.findall(r'﴿(.*?)﴾', model_answer)
+def verify_and_isolate_output(
+    model_answer,
+    seed_path="milyar/corpus/approved/quran_reference_seed.jsonl"
+):
+    if not isinstance(model_answer, str):
+        raise TypeError("الإجابة يجب أن تكون نصاً.")
+
+    # لا نسمح بوجود علامة اقتباس افتتاحية أو ختامية غير متوازنة.
+    if model_answer.count("﴿") != model_answer.count("﴾"):
+        raise ValueError("علامات الاقتباس القرآني غير متوازنة.")
+
+    extracted_quotes = re.findall(
+        r"﴿(.*?)﴾", model_answer, flags=re.DOTALL
+    )
+
+    # هذا الفحص لا يدّعي اكتشاف الاقتباسات غير المحاطة بالعلامتين.
     if not extracted_quotes:
         return model_answer
+
     seed_file = Path(seed_path)
-    if not seed_file.exists():
-        raise FileNotFoundError("🚨 خطأ حرج: ملف البذرة المرجعية الموثق غير موجود!")
+    if not seed_file.is_absolute():
+        seed_file = ROOT_DIR / seed_file
+
+    if not seed_file.is_file():
+        raise FileNotFoundError("ملف البذرة المرجعية غير موجود.")
+
     reference_texts = set()
-    with open(seed_file, "r", encoding="utf-8") as f:
-        for line in f:
-            try:
-                line_data = json.loads(line)
-                if line_data.get("type") == "quranic_text":
-                    reference_texts.add(line_data["text"].strip())
-            except:
+
+    with seed_file.open(encoding="utf-8") as f:
+        for line_number, line in enumerate(f, 1):
+            if not line.strip():
                 continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise ValueError(
+                    f"سجل JSON غير صالح في السطر {line_number}."
+                ) from exc
+
+            if not isinstance(item, dict):
+                raise ValueError(
+                    f"السجل {line_number} ليس كائناً صالحاً."
+                )
+
+            if item.get("type") == "quranic_text":
+                text = item.get("text")
+                if not isinstance(text, str) or not text.strip():
+                    raise ValueError(
+                        f"النص المرجعي فارغ أو غير صالح في السطر {line_number}."
+                    )
+                # توحيد المسافات فقط؛ لا نحذف التشكيل ولا نغير الحروف.
+                reference_texts.add(" ".join(text.split()))
+
+    if not reference_texts:
+        raise ValueError("لا توجد نصوص قرآنية في البذرة المرجعية.")
+
     for quote in extracted_quotes:
-        quote_stripped = quote.strip()
-        if quote_stripped not in reference_texts:
-            raise ValueError(f"🚨 [محاولة تمرير نص غير مطابق]: تم حظر وعزل المخرج لوجود اقتباس غير مطابق للمرجع الموثق بنسبة 100%: (﴿{quote_stripped}﴾)")
+        quote_normalized = " ".join(quote.split())
+        if not quote_normalized:
+            raise ValueError("يوجد اقتباس فارغ.")
+
+        if quote_normalized not in reference_texts:
+            raise ValueError(
+                "اقتباس محاط بالعلامتين غير مطابق للنصوص الموجودة "
+                "في البذرة المرجعية."
+            )
+
     return model_answer
 
 from milyar.local_model import ask
@@ -60,7 +107,8 @@ def protected_ask(question, max_tokens=96):
     raw_answer = ask(prompt, min(max_tokens, 96))
     secure_answer = verify_and_isolate_output(raw_answer)
     return {
-        "label": "مخرجات ذكاء اصطناعي — تم فحصها آلياً بالحرف والتشكيل بنسبة 100%",
+        "label": "مخرجات ذكاء اصطناعي — فُحصت الاقتباسات المحددة مقابل البذرة المرجعية",
         "quran_is_not_modified": True,
+        "verification_scope": "الاقتباسات المحاطة بالعلامتين فقط؛ لا يشمل كل النصوص القرآنية.",
         "answer": secure_answer
     }

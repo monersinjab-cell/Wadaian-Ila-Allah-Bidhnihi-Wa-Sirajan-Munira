@@ -1,15 +1,11 @@
+venv/
 __pycache__/
-*.py[cod]
-*.bak
-
-# Local credentials and private authentication files
+*.pyc
+data/secure_keys/
+.env
+# Local credentials and private backups
 simulation/vr_command/local_auth.json
 simulation/vr_command/local_auth.backup-*.json
-*.env
-.env
-.env.*
-*.pem
-*.key
-
-# Local backup copies
+*.bak
+*.save
 *.backup-*

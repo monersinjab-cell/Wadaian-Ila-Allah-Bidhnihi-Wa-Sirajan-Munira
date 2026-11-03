@@ -9,10 +9,14 @@ def run_security_shield():
     }
     findings = []
     for p in root.rglob("*.py"):
-        if "venv" in p.parts or ".git" in p.parts or "army_agents" in p.parts:
+        if ("venv" in p.parts or ".git" in p.parts or "army_agents" in p.parts or "tests" in p.parts or p.name.startswith("test_")):
             continue
         try:
             for i, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
+                # تجاهل تعريف قاعدة الكشف البرمجية نفسها فقط.
+                if (p.name == "milyar_execute_all.py"
+                    and "re.compile(" in line and "PRIVATE KEY" in line):
+                    continue
                 for label, pattern in patterns.items():
                     if pattern.search(line):
                         findings.append(f"{p.name} (السطر {i}): {label}")

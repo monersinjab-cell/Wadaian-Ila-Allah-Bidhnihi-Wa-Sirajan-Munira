@@ -162,6 +162,9 @@ for name in tracked:
     except Exception:
         continue
     for lineno, line in enumerate(text.splitlines(), 1):
+        # تجاهل تعريف قواعد الكشف نفسها، مع استمرار فحص بقية الأسطر.
+        if name == "milyar_execute_all.py" and 136 <= lineno <= 142:
+            continue
         for label, pattern in patterns:
             if pattern.search(line):
                 findings.append({"file": name, "line": lineno, "pattern": label})
