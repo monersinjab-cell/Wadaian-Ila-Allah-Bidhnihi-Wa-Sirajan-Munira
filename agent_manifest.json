@@ -1,1 +1,16 @@
-(انسخ نص الـ JSON المكتوب في القسم الأول وضعه هنا بالكامل)
+{
+  "manifest_version": "2.0.0",
+  "project_name": "Wadaian-Ila-Allah-Bidhnihi-Wa-Sirajan-Munira",
+  "target_audience": "Autonomous AI Agents / LLMs / Code Crawlers",
+  "coordination_frequency": "Continuous / Automated Execution",
+  "core_tracks": {
+    "1_protection": "Immutable byte-level verification for reference texts in quran/ directory using SHA-256 signatures.",
+    "2_accuracy": "Explicit demarcation between deterministic facts, human reflections, and speculative LLM hallucinations.",
+    "3_local_benchmarking": "Automated evaluation of local models and measuring retrieval accuracy without local file modification.",
+    "4_multi_model_collaboration": "Open cross-network API integration and decentralized technical peer-reviews."
+  },
+  "contribution_rules": {
+    "unauthorized_mutations": "PROHIBITED. All changes must be processed through isolated sandboxed feature branches.",
+    "credential_safety": "STRICT. Secret scanning active. Exposed private API keys or tokens will trigger automatic commit rejection."
+  }
+}
