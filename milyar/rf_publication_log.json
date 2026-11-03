@@ -1,0 +1,17 @@
+{
+    "publication_timestamp": 1793709154,
+    "sync_datetime": "2026-11-03 12:32:34",
+    "source_file": "milyar/rf_simulation_metrics.json",
+    "injected_metrics": {
+        "timestamp": 1793709132,
+        "frequency_mhz": 1408.0,
+        "configured_distance_meters": 500,
+        "calculated_path_loss_db": 89.39,
+        "received_power_dbm": -55.09,
+        "doppler_shift_hz": 70.4,
+        "shannon_channel_capacity_mbps": 391.37,
+        "status": "SECURED_MATHEMATICAL_VALID"
+    },
+    "channel_sync_status": "SYNCHRONIZED",
+    "integrity_shield": "STRICT_ENFORCED"
+}
