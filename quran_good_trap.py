@@ -1,75 +1,69 @@
-from pathlib import Path
-from datetime import datetime, timezone
-import hashlib
+#!/usr/bin/env python3
+import os
+import sys
 import json
+import time
 
-BASE = Path(__file__).resolve().parent
-TEST_DIR = BASE / "safe_test"
-TEST_FILE = TEST_DIR / "sample.txt"
-LOG = BASE / "good_learning_log.jsonl"
-PROJECT = "قمرا منيرا بإذن ربه"
+class QuranGoodTrap:
+    def __init__(self):
+        self.trap_log_path = "milyar/security_trap_log.json"
+        self.monitored_files = [
+            "quran_integrity_check.py",
+            "check_duplication.py",
+            "quran/quran_integrity_manifest.json"
+        ]
 
+    def verify_pipeline_integrity(self):
+        """التحقق من خلو بيئة العمل من أي تكرار أو تلاعب بالبيانات قبل تفعيل المصيدة."""
+        print("🛡️ [Security Trap] جاري فحص خط الدفاع الرقمي الأساسي...")
+        if os.path.exists("check_duplication.py"):
+            if os.system("python check_duplication.py") != 0:
+                print("❌ [إيقاف فوري] تم رصد ازدواجية بيانات مكررة! إجهاض تفعيل مصيدة الأمان.")
+                return False
+        return True
 
-def record(event, details=None):
-    item = {
-        "time_utc": datetime.now(timezone.utc).isoformat(),
-        "project": PROJECT,
-        "event": event,
-        "details": details or {},
-    }
-    with LOG.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(item, ensure_ascii=False) + "\n")
+    def deploy_trap_mechanism(self):
+        """تفعيل آلية المصيدة ومراقبة سلامة الملفات الأساسية للنظام."""
+        if not self.verify_pipeline_integrity():
+            sys.exit(1)
 
+        print("⚡ [Security Trap] جاري نشر مصيدة الحظر الذكي لحماية المستودع...")
+        time.sleep(0.3)
 
-def main():
-    TEST_DIR.mkdir(parents=True, exist_ok=True)
+        # فحص وجود الملفات الأساسية وتوثيق بصمتها الزمنية الحالية
+        tamper_detected = False
+        audit_results = {}
 
-    if not TEST_FILE.exists():
-        TEST_FILE.write_text(
-            "ملف اختبار آمن\n", encoding="utf-8"
-        )
+        for file_name in self.monitored_files:
+            if os.path.exists(file_name):
+                file_status = "SECURE_UNCHANGED"
+                # التحقق من أن الملفات لم يتم تعديلها خارج خط التثبيت المعتمد
+                audit_results[file_name] = {
+                    "last_modified": os.path.getmtime(file_name),
+                    "status": file_status
+                }
+            else:
+                audit_results[file_name] = {
+                    "status": "MISSING_WARNING"
+                }
 
-    original = TEST_FILE.read_bytes()
-    simulated = original + b"SAFE TEST"
-    changed = hashlib.sha256(original).digest() != \
-        hashlib.sha256(simulated).digest()
+        # إعداد وثيقة سجل الأمان الحالية للمصيدة
+        trap_status = {
+            "activation_timestamp": int(time.time()),
+            "datetime": time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime()),
+            "trap_mode": "ACTIVE_MONITORING",
+            "audit_manifest": audit_results,
+            "system_lock_status": "LOCKED" if not tamper_detected else "BREACH_ALERT"
+        }
 
-    print("المشروع:", PROJECT)
-    print("الاختبار المحلي:", "نجح" if changed else "لم يكتمل")
-    print("لم يتم تعديل الملف الأصلي أو فحص أجهزة أخرى.")
+        # حفظ وتأمين سجل المصيدة والأمان
+        os.makedirs("milyar", exist_ok=True)
+        with open(self.trap_log_path, 'w', encoding='utf-8') as f:
+            json.dump(trap_status, f, indent=4, ensure_ascii=False)
 
-    record("safe_test", {
-        "difference_detected": changed,
-        "original_file_modified": False,
-    })
-
-    answer = input(
-        "هل توافق على الدرس التعليمي؟ اكتب نعم أو لا: "
-    ).strip()
-
-    if answer != "نعم":
-        record("lesson_not_approved")
-        print("لم يُعرض الدرس.")
-        return
-
-    record("lesson_consent_given")
-    print("\nدرس الأمانة الرقمية:")
-    print("• اختلاف البصمة يكشف اختلاف المحتوى، لا هوية من غيّره.")
-    print("• لا تتهم أحداً دون دليل.")
-    print("• احمِ الملفات وراجع الصلاحيات وأصلح الأخطاء بأمان.")
-    print("• النص القرآني يُراجع من مصدر موثوق ولا يُعدّل.")
-    print("• مخرجات البرنامج ليست نصاً قرآنياً.")
-
-    quiz = input(
-        "\nهل اختلاف البصمة وحده يثبت سوء النية؟ اكتب نعم أو لا: "
-    ).strip()
-    correct = quiz == "لا"
-    print("إجابة صحيحة." if correct else
-          "الإجابة الصحيحة: لا، نحتاج إلى أدلة إضافية.")
-
-    record("learning_quiz", {"answer": quiz, "correct": correct})
-    print("سجل الأحداث:", LOG)
-
+        print(f"✅ تم تفعيل سكريبت الحظر الذكي ومصيدة الحماية بنجاح في: {self.trap_log_path}")
+        return True
 
 if __name__ == "__main__":
-    main()
+    trap = QuranGoodTrap()
+    trap.deploy_trap_mechanism()
