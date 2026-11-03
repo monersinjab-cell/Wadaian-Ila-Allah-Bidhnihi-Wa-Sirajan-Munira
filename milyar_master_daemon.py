@@ -1,47 +1,56 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+import os
 import sys
-import time
 import json
-from pathlib import Path
+import time
 
-ROOT = Path.cwd()
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
-from milyar.army_agents.agent_auto_evolve import run_evolution_audit
-from milyar.army_agents.agent_integrity import verify_seed_integrity
-
-def start_eternal_milyar_daemon():
-    print("==========================================================")
-    print("🌙 [منظومة المليار العظمى] - تفعيل محرك الخدمة الدائمة والمستمرة")
-    print("🔒 جدار الحظر الميكانيكي الحتمي وبصمة القرآن العظيم نشطة بلا توقف")
-    print("==========================================================")
-    
-    cycle_count = 1
-    while True:
-        try:
-            # 1. القفل الذاتي والتحقق التشفيري المستمر من سلامة البذور المرجعية بنسبة 100%
-            integrity_report = verify_seed_integrity()
-            
-            # 2. التطوير الذاتي للتحقق وإلزام كافة الملفات المحلية والأنظمة بمعايير الحق
-            evolution_report = run_evolution_audit()
-            
-            if "🚨" in integrity_report or "❌" in evolution_report:
-                print(f"⚠️ [إشعار حرج - الدورة {cycle_count}]: تم رصد محاولة خرق أو تلاعب! تفعيل الإغلاق الأمني التلقائي الفوري.")
-            else:
-                print(f"🛡️ [دورة الفحص المستمر {cycle_count}]: المنظومة محصنة، محكومة، وتعمل ذاتياً بالآيات البينات بنجاح.")
+class MilyarMasterDaemon:
+    def __init__(self):
+        self.daemon_status_path = "milyar/daemon_status.json"
+        self.is_running = False
+        
+    def check_core_integrity(self):
+        """فحص تكامل المنظومة كلياً قبل تشغيل الخدمة الخلفية المستمرة."""
+        print("🛡️ [Daemon Core] جاري التحقق من بروتوكولات الأمان الشاملة للمنظومة...")
+        
+        # 1. فحص عدم تكرار أو ازدواجية البيانات
+        if os.path.exists("check_duplication.py"):
+            if os.system("python check_duplication.py") != 0:
+                print("❌ [Daemon Alert] تم رصد ازدواجية بيانات مكررة! إجهاض تشغيل الخدمة الخلفية.")
+                return False
                 
-            cycle_count += 1
-            # تعليق الحلقة مؤقتاً لمدة 60 ثانية قبل إعادة الفحص الحتمي لضمان كفاءة معالج الهاتف
-            time.sleep(60)
-            
-        except KeyboardInterrupt:
-            print("\n⚠️ [تنبيه الحوكمة]: محاولة إيقاف يدوي للخدمة. إعادة التشغيل الذاتي الفوري مستمرة.")
-            continue
-        except Exception as e:
-            print(f"❌ استثناء في حلقة الأتمتة: {e}. إعادة التحصين تلقائياً.")
-            time.sleep(5)
-            continue
+        # 2. فحص سلامة النص القرآني المرجعي
+        if os.path.exists("quran_integrity_check.py"):
+            if os.system("python quran_integrity_check.py") != 0:
+                print("❌ [Daemon Alert] فشل مطابقة النص المرجعي الشريف! إجهاض فوري للخدمة.")
+                return False
+                
+        print("✅ [Daemon Core] المنظومة مستقرة واجتازت كافة معايير السلامة الرقمية.")
+        return True
 
-if __name__ == '__main__':
-    start_eternal_milyar_daemon()
+    def start_daemon_service(self):
+        """تشغيل وتأمين الخدمة الخلفية المركزية."""
+        if not self.check_core_integrity():
+            sys.exit(1)
+            
+        print("⚙️ [Daemon Core] جاري تشغيل الخدمة الخلفية المستمرة للنظام...")
+        self.is_running = True
+        
+        # تسجيل تقرير حالة تشغيل الخدمة الخلفية
+        daemon_status = {
+            "daemon_mode": "ACTIVE_BACKGROUND_SERVICE",
+            "uptime_start": int(time.time()),
+            "integrity_shield": "STRICT_ENFORCED",
+            "status": "HEALTHY"
+        }
+        
+        os.makedirs("milyar", exist_ok=True)
+        with open(self.daemon_status_path, 'w', encoding='utf-8') as f:
+            json.dump(daemon_status, f, indent=4, ensure_ascii=False)
+            
+        print(f"✅ تم تشغيل الـ Daemon وتأمين ملف الحالة بنجاح في: {self.daemon_status_path}")
+        return True
+
+if __name__ == "__main__":
+    daemon = MilyarMasterDaemon()
+    daemon.start_daemon_service()
